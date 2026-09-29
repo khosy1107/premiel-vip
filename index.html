@@ -320,6 +320,11 @@ textarea.input{border-radius:20px;padding:14px 18px}
 .sheet-link{display:inline-flex;gap:6px;align-items:center;margin-top:18px;padding:9px 16px;border-radius:999px;background:var(--glass-2);border:1px solid var(--glass-line);color:var(--ink);font-size:13.5px;font-weight:500;text-decoration:none}
 .pill.warn{background:var(--danger-soft);color:var(--danger)}
 
+.view-link{display:grid;gap:8px;margin-top:14px}
+.view-link-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.view-link-row a{flex:1 1 220px;min-width:0;padding:12px 18px;border-radius:999px;background:var(--field);border:1px solid var(--glass-line);color:var(--ink);font-size:14px;word-break:break-all;text-decoration:none}
+.view-link-row .btn{min-height:46px;padding:10px 20px}
+
 /* 약관 전용 보기 (?terms) */
 .terms-only #form>section:not([aria-labelledby="h-terms"]),.terms-only #form .submit-row,.terms-only .agree,.terms-only #terms-toggle,.terms-only #receipt,.terms-only .block-head .step,.terms-only .block-head .who{display:none!important}
 .terms-only .terms{max-height:none;overflow:visible;background:var(--field)}
@@ -333,6 +338,8 @@ textarea.input{border-radius:20px;padding:14px 18px}
 .view-gate p{margin:0 0 14px;color:var(--muted);font-size:14px}
 .view-gate .row{display:flex;gap:8px}
 .view-gate .input{text-align:center;letter-spacing:.3em;font-size:20px}
+.view-gate .row .input{flex:1;min-width:0}
+.view-gate .row .btn{flex:none;white-space:nowrap;min-height:48px;padding:0 26px;word-break:keep-all}
 .view-gate .msg{margin-top:10px;font-size:13.5px;color:var(--danger);min-height:1.2em}
 .view-banner{margin-top:18px;text-align:center;padding:10px 16px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:13.5px;font-weight:500}
 .view-only #form .submit-row,.view-only .sig-btns,.view-only .pad .ph,.view-only .pad .base,.view-only .pad canvas,.view-only .check.all{display:none!important}
@@ -538,12 +545,11 @@ textarea.input{border-radius:20px;padding:14px 18px}
     <div id="receipt" hidden>
       <div class="block" style="padding:16px 18px">
         <div id="save-state"></div>
-        <div class="actions">
-          <button class="btn" type="button" data-act="talk">네이버톡톡 안내문 복사</button>
-          <button class="btn sec" type="button" data-act="png">계약서 이미지 저장·공유</button>
-          <button class="btn sec" type="button" data-act="print">인쇄</button>
+        <div class="view-link" id="view-link-box" hidden>
+          <span class="label">내 계약서 보기 링크</span>
+          <div class="view-link-row"><a id="view-link" href="#" target="_blank" rel="noopener"></a><button type="button" class="btn" id="copy-link">링크 복사</button></div>
+          <p class="hint" style="margin:0">이 링크를 고객에게 네이버 톡톡으로 보내 주세요. 고객은 연락처 뒷 4자리를 입력하면 작성한 계약서를 볼 수 있어요.</p>
         </div>
-        <p class="hint" style="margin:0">계약서 이미지는 고객에게 톡톡으로 사본을 보낼 때 사용하세요.</p>
         <div class="copy-host"></div>
       </div>
       <div class="sheet-host" id="receipt-sheet"></div>
@@ -1151,10 +1157,21 @@ function showReceipt(r, res){
     : "<div class=\"notice warn\"><b>계약서는 작성되었지만 아직 저장되지 않았어요.</b> " + esc(res.reason) + " <button type=\"button\" class=\"btn-ghost\" id=\"retry-save\">다시 저장</button></div>";
   var rb = $("#retry-save"); if (rb) rb.addEventListener("click", retrySave);
   $(".copy-host", rc).innerHTML = "";
+  var box = $("#view-link-box"), a = $("#view-link");
+  box.hidden = !(res.ok && r.viewUrl);
+  if (r.viewUrl) { a.href = r.viewUrl; a.textContent = r.viewUrl; }
   $("#receipt-sheet").innerHTML = sheetHTML(r);
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
-wireActions($("#receipt"), function(){ return lastRecord; }, $("#receipt-sheet"));
+$("#copy-link").addEventListener("click", async function(){
+  var r = lastRecord; if (!r || !r.viewUrl) return;
+  try { await navigator.clipboard.writeText(r.viewUrl); toast("링크를 복사했어요. 네이버 톡톡에 붙여넣어 주세요."); }
+  catch (e) {
+    var host = $(".copy-host", $("#receipt"));
+    host.innerHTML = "<p class=\"hint\" style=\"margin:10px 0 0\">자동 복사가 막혀 있어요. 아래 링크를 길게 눌러 복사해 주세요.</p><textarea class=\"input copy-fallback\" style=\"min-height:70px\" readonly></textarea>";
+    var ta = $("textarea", host); ta.value = r.viewUrl; ta.focus(); ta.select();
+  }
+});
 
 $("#new-contract").addEventListener("click", function(){
   form.reset();
