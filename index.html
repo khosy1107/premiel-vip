@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
+<script>if (/[?&]terms\b/.test(location.search)) document.documentElement.classList.add("terms-only");
+if (/[?&]c=/.test(location.search)) document.documentElement.classList.add("view-only","view-locked");</script>
 <meta name="theme-color" content="#E297A3">
 <style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>프리미엘네일 VIP 회원권 계약서</title>
@@ -318,6 +320,25 @@ textarea.input{border-radius:20px;padding:14px 18px}
 .sheet-link{display:inline-flex;gap:6px;align-items:center;margin-top:18px;padding:9px 16px;border-radius:999px;background:var(--glass-2);border:1px solid var(--glass-line);color:var(--ink);font-size:13.5px;font-weight:500;text-decoration:none}
 .pill.warn{background:var(--danger-soft);color:var(--danger)}
 
+/* 약관 전용 보기 (?terms) */
+.terms-only #form>section:not([aria-labelledby="h-terms"]),.terms-only #form .submit-row,.terms-only .agree,.terms-only #terms-toggle,.terms-only #receipt,.terms-only .block-head .step,.terms-only .block-head .who{display:none!important}
+.terms-only .terms{max-height:none;overflow:visible;background:var(--field)}
+.terms-only .terms ol,.terms-only .terms ul{font-size:15px;line-height:1.8}
+.terms-only .terms h3{font-size:16.5px}
+.terms-foot{margin:14px 4px 0;font-size:13px;color:var(--muted);text-align:center}
+/* 제출된 계약서 열람 (?c=계약ID) */
+.view-locked #form{display:none}
+.view-gate{max-width:420px;margin:18px auto 0;text-align:center}
+.view-gate h2{font-size:19px;font-weight:800;letter-spacing:-.04em;margin:0 0 6px}
+.view-gate p{margin:0 0 14px;color:var(--muted);font-size:14px}
+.view-gate .row{display:flex;gap:8px}
+.view-gate .input{text-align:center;letter-spacing:.3em;font-size:20px}
+.view-gate .msg{margin-top:10px;font-size:13.5px;color:var(--danger);min-height:1.2em}
+.view-banner{margin-top:18px;text-align:center;padding:10px 16px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:13.5px;font-weight:500}
+.view-only #form .submit-row,.view-only .sig-btns,.view-only .pad .ph,.view-only .pad .base,.view-only .pad canvas,.view-only .check.all{display:none!important}
+.view-only #form input:disabled:not([type=radio]):not([type=checkbox]),.view-only #form textarea:disabled{opacity:1;color:var(--ink);-webkit-text-fill-color:var(--ink)}
+.view-only .check.off{opacity:.42}
+.sig-img{display:block;width:100%;height:170px;object-fit:contain;background:#fff}
 @media print{
   .bg,.mast,#view-new>form,#receipt>.block,#receipt>.submit-row{display:none!important}
   body{background:#fff!important}
@@ -473,6 +494,7 @@ textarea.input{border-radius:20px;padding:14px 18px}
           <button type="button" class="terms-banner" id="terms-toggle" aria-expanded="false" aria-controls="terms"><span id="terms-toggle-label">약관 확대해서 보기</span><span id="terms-toggle-ic"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M9.5 2.5h4v4M6.5 13.5h-4v-4M13.5 2.5 9 7M2.5 13.5 7 9"/></svg></span></button>
           <div class="terms" id="terms" tabindex="0" aria-label="약관 전문"></div>
         </div>
+        <p class="terms-foot" id="terms-foot" hidden></p>
         <div class="agree">
           <label class="check all"><input type="checkbox" id="agree-all"> 아래 항목에 모두 동의합니다.</label>
           <div class="field" data-f="agreeTerms">
@@ -539,6 +561,7 @@ textarea.input{border-radius:20px;padding:14px 18px}
 /* ---------------- 기준 정보 ---------------- */
 var SHOP = { name: "프리미엘네일", tel: "010-2344-6250" };
 var TERMS_VERSION = "2026.09 v4";
+var TERMS_URL = "https://khosy1107.github.io/premiel-vip/terms/";
 var PLANS = [
   { id:"100", label:"100만원권", price:1000000, creditCash:1100000, creditCard:1000000, months:18 },
   { id:"50",  label:"50만원권",  price:500000,  creditCash:550000,  creditCard:500000,  months:12 },
@@ -953,7 +976,13 @@ function validate(r){
 /* ---------------- 저장 (Google Apps Script) ---------------- */
 // Apps Script 배포 후 받은 웹 앱 URL을 넣어 주세요. token은 Apps Script의 TOKEN과 같아야 합니다.
 var API = { url: "https://script.google.com/macros/s/AKfycbwLmuPPm4xRtHM_3n5grZn9Y9HObSIbqxWQgMYSqKMHeKUJLN_s2LoG33caWJIh7xoT/exec", token: "premiel-vip-2026" };
-function newId(){ return "PV" + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 6).toUpperCase(); }
+function newId(){
+  var abc = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", b = new Uint8Array(14), out = "PV";
+  (window.crypto || window.msCrypto).getRandomValues(b);
+  for (var i = 0; i < b.length; i++) out += abc[b[i] % abc.length];
+  return out;
+}
+var VIEW_BASE = "https://khosy1107.github.io/premiel-vip/?c=";
 function contractDocHTML(r){
   var css = $("#sheet-css").textContent;
   var terms = "<section class=\"s-terms\"><h4>가입 약관 (" + esc(r.termsVersion || "") + ")</h4><div style=\"white-space:pre-wrap\">" + esc(r.termsText || "") + "</div></section>";
@@ -998,12 +1027,15 @@ form.addEventListener("submit", async function(e){
   var res = await saveRecord(r);
   btn.disabled = false; btn.textContent = "계약서 제출";
   lastRecord = r;
+  if (res.ok) r.viewUrl = VIEW_BASE + encodeURIComponent(r.id);
   showReceipt(r, res);
 });
 async function retrySave(){
   var el = $("#save-state"), r = lastRecord; if (!r) return;
   el.innerHTML = "<div class=\"notice\">다시 저장하는 중…</div>";
-  showReceipt(r, await saveRecord(r));
+  var res = await saveRecord(r);
+  if (res.ok) r.viewUrl = VIEW_BASE + encodeURIComponent(r.id);
+  showReceipt(r, res);
 }
 
 /* ---------------- 계약서 시트 ---------------- */
@@ -1053,14 +1085,12 @@ function talkText(r){
     "▪ 유효기간: " + dot(r.startDate) + " ~ " + dot(r.endDate) + " (" + r.months + "개월)",
     "",
     "▪ VIP 혜택: " + BENEFIT, "",
-    "[예약 취소·변경 안내]",
-    "- 예약은 상담 후 보내드리는 네이버 예약 링크로 해 주세요.",
-    "- 예약금: 시술 1건당 3만원 (제거·케어는 시술 금액 전액, 제거는 비회원가 기준)",
-    "- 3일 전까지 취소·변경: 차감 없음",
-    "- 2일 전: 예약금의 50% 차감",
-    "- 1일 전·당일·불참: 예약금 전액 차감",
-    "- 10분 이상 늦으시면 시술이 어려워요. (당일 취소로 처리)", "",
-    "환불은 계약서 제4조(공정위 소비자분쟁해결기준)에 따라 언제든 요청하실 수 있습니다.",
+    (r.viewUrl ? "▪ 내 계약서 보기: " + r.viewUrl + "\n  (연락처 뒷 4자리를 입력하면 열려요)" : ""),
+    "▪ 약관 전문 보기: " + TERMS_URL, "",
+    "━━━━━━━━━━━━",
+    "[회원권 약관 전문 · " + (r.termsVersion || TERMS_VERSION) + "]", "",
+    r.termsText || termsText(),
+    "━━━━━━━━━━━━", "",
     "문의: " + SHOP.tel,
     "감사합니다 :)"
   ];
@@ -1141,6 +1171,71 @@ $("#new-contract").addEventListener("click", function(){
   pads.staff.resize(); pads.member.resize();
 });
 
+/* ---------------- 제출된 계약서 열람 ---------------- */
+function viewId(){ var m = /[?&]c=([^&#]+)/.exec(location.search); return m ? decodeURIComponent(m[1]) : ""; }
+function ymd(v){ var d = String(v || "").match(/\d+/g); return d && d.length >= 3 ? d[0] + "-" + pad2(+d[1]) + "-" + pad2(+d[2]) : ""; }
+function fillReadOnly(r){
+  $("#name").value = r.name || ""; $("#birth").value = r.birth || ""; $("#phone").value = r.phone || "";
+  $$("input[name=kind]").forEach(function(x){ x.checked = x.value === r.kind; });
+  $$("input[name=method]").forEach(function(x){ x.checked = x.value === (String(r.method).indexOf("현금") >= 0 ? "cash" : "card"); });
+  var plan = PLANS.filter(function(p){ return p.label === r.planLabel; })[0];
+  $$("input[name=plan]").forEach(function(x){ x.checked = !!plan && x.value === plan.id; });
+  if (plan) $("#rate-table").innerHTML = rateTableHTML(plan.id);
+  $("#start").value = ymd(r.startDate);
+  $("#end").value = dot(ymd(r.endDate)) + (plan ? "  (" + plan.months + "개월)" : "");
+  $("#price").value = comma(num(r.price)); $("#credit").value = comma(num(r.credit));
+  var bonus = String(r.bonus || "");
+  $("#bonus-visit").checked = bonus.indexOf("3회") >= 0; $("#bonus-renew").checked = bonus.indexOf("연장") >= 0;
+  $("#lb-visit").classList.toggle("off", !$("#bonus-visit").checked);
+  $("#lb-renew").classList.toggle("off", !$("#bonus-renew").checked);
+  $("#agree-terms").checked = r.agreeTerms === "동의"; $("#agree-privacy").checked = r.agreePrivacy === "동의"; $("#agree-mkt").checked = r.agreeMarketing === "동의";
+  $("#sign-date").textContent = dot(ymd(r.signDate));
+  [["staff", r.sigStaff], ["member", r.sigMember]].forEach(function(x){
+    var pad = $("#pad-" + x[0]).parentNode, img = document.createElement("img");
+    img.className = "sig-img"; img.alt = x[0] === "staff" ? "담당자 확인" : "회원 서명"; if (x[1]) img.src = x[1];
+    pad.appendChild(img);
+  });
+  $$("#form input, #form textarea").forEach(function(el){ el.disabled = true; });
+  $$("#form .sig-btns button").forEach(function(el){ el.disabled = true; });
+  var ban = document.createElement("div"); ban.className = "view-banner";
+  ban.textContent = "제출된 계약서입니다 · " + dot(ymd(r.signDate)) + " 서명 · 수정할 수 없어요";
+  form.parentNode.insertBefore(ban, form);
+  document.title = SHOP.name + " VIP 회원권 계약서 (" + (r.name || "") + ")";
+  document.documentElement.classList.remove("view-locked");
+}
+if (document.documentElement.classList.contains("view-only")) {
+  var id = viewId();
+  var gate = document.createElement("section");
+  gate.className = "block view-gate";
+  gate.innerHTML = "<h2>내 계약서 보기</h2><p>본인 확인을 위해 계약 시 입력한 연락처 뒷 4자리를 입력해 주세요.</p>" +
+    "<div class=\"row\"><input class=\"input num\" id=\"gate-p4\" inputmode=\"numeric\" maxlength=\"4\" placeholder=\"0000\" aria-label=\"연락처 뒷 4자리\"><button type=\"button\" class=\"btn\" id=\"gate-go\">확인</button></div>" +
+    "<div class=\"msg\" id=\"gate-msg\" role=\"status\"></div>";
+  form.parentNode.insertBefore(gate, form);
+  $("#gate-p4").addEventListener("input", function(){ this.value = digits(this.value).slice(0, 4); });
+  async function openView(){
+    var p4 = $("#gate-p4").value, msg = $("#gate-msg"), go = $("#gate-go");
+    if (p4.length !== 4) { msg.textContent = "숫자 4자리를 입력해 주세요."; return; }
+    go.disabled = true; msg.style.color = "var(--muted)"; msg.textContent = "계약서를 불러오는 중…";
+    try {
+      var res = await fetch(API.url + "?id=" + encodeURIComponent(id) + "&p4=" + p4);
+      var out = await res.json();
+      if (out && out.ok) { gate.remove(); fillReadOnly(out.record); return; }
+      msg.style.color = ""; msg.textContent = "계약서를 찾을 수 없어요. 연락처 뒷 4자리를 다시 확인해 주세요.";
+    } catch (e) {
+      msg.style.color = ""; msg.textContent = "불러오지 못했어요. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.";
+    }
+    go.disabled = false;
+  }
+  $("#gate-go").addEventListener("click", openView);
+  $("#gate-p4").addEventListener("keydown", function(e){ if (e.key === "Enter") openView(); });
+}
+if (document.documentElement.classList.contains("terms-only")) {
+  document.title = SHOP.name + " VIP 회원권 약관";
+  $(".mast .kr").textContent = "회원권 약관";
+  $("#h-terms").textContent = "회원권 이용 약관";
+  var tf = $("#terms-foot"); tf.hidden = false;
+  tf.textContent = "약관 버전 " + TERMS_VERSION + " · 문의 " + SHOP.tel;
+}
 })();
 </script>
 

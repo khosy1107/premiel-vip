@@ -15,6 +15,7 @@ const FOLDER_NAME = '프리미엘네일 계약서';
 const TOKEN = 'premiel-vip-2026';   // index.html 의 API.token 과 같아야 합니다
 const ID_COL = 18;                  // R열: 계약ID
 const PDF_COL = 19;                 // S열: 계약서 PDF
+const VIEW_BASE = 'https://khosy1107.github.io/premiel-vip/?c=';
 
 function doPost(e) {
   try {
@@ -64,7 +65,7 @@ function doPost(e) {
         r.startDate, r.endDate,
         r.agreeTerms ? '동의' : '미동의', r.agreePrivacy ? '동의' : '미동의', r.agreeMarketing ? '동의' : '미동의',
         r.termsVersion || '', r.id,
-        pdfUrl, staffUrl, memberUrl
+        pdfUrl, staffUrl, memberUrl, VIEW_BASE + r.id
       ]);
       return json_({ ok: true, id: r.id, pdfUrl: pdfUrl });
     } finally {
@@ -75,8 +76,33 @@ function doPost(e) {
   }
 }
 
-function doGet() {
-  return ContentService.createTextOutput('프리미엘네일 계약서 저장 서버가 동작 중입니다.');
+function doGet(e) {
+  const id = e && e.parameter && e.parameter.id;
+  if (!id) return ContentService.createTextOutput('프리미엘네일 계약서 저장 서버가 동작 중입니다.');
+  const p4 = String(e.parameter.p4 || '');
+  const sh = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
+  const last = sh.getLastRow();
+  if (last < 2) return json_({ ok: false, error: 'notfound' });
+  const rows = sh.getRange(2, 1, last - 1, 21).getDisplayValues();
+  const row = rows.filter(function (v) { return v[ID_COL - 1] === id; })[0];
+  // 계약ID와 연락처 뒷 4자리가 모두 맞을 때만 보여줌
+  if (!row || String(row[4]).replace(/\D/g, '').slice(-4) !== p4) return json_({ ok: false, error: 'notfound' });
+  return json_({ ok: true, record: {
+    signDate: row[1], name: row[2], birth: row[3], phone: row[4], kind: row[5], planLabel: row[6], method: row[7],
+    price: row[8], credit: row[9], bonus: row[10], startDate: row[11], endDate: row[12],
+    agreeTerms: row[13], agreePrivacy: row[14], agreeMarketing: row[15], termsVersion: row[16], id: row[17],
+    sigStaff: imageData_(row[19]), sigMember: imageData_(row[20])
+  } });
+}
+
+function imageData_(url) {
+  const m = /\/d\/([^/]+)/.exec(url || '');
+  if (!m) return '';
+  try {
+    return 'data:image/png;base64,' + Utilities.base64Encode(DriveApp.getFileById(m[1]).getBlob().getBytes());
+  } catch (err) {
+    return '';
+  }
 }
 
 function folder_() {
