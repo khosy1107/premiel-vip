@@ -325,6 +325,26 @@ textarea.input{border-radius:20px;padding:14px 18px}
 .view-link-row a{flex:1 1 220px;min-width:0;padding:12px 18px;border-radius:999px;background:var(--field);border:1px solid var(--glass-line);color:var(--ink);font-size:14px;word-break:break-all;text-decoration:none}
 .view-link-row .btn{min-height:46px;padding:10px 20px}
 
+/* 담당자 선택 */
+.staff-pad{cursor:pointer;min-height:170px}
+.staff-pad canvas{visibility:hidden}
+.staff-picked{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;letter-spacing:-.02em;color:#1F1418;pointer-events:none}
+.staff-pop{position:absolute;inset:0;z-index:3;background:rgba(255,255,255,.97);border-radius:20px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;overflow:auto;cursor:default}
+.staff-pop-head{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:#7a6a70}
+.staff-edit-btn{appearance:none;border:0;background:none;color:#7a6a70;text-decoration:underline;font-size:12.5px;cursor:pointer;padding:2px 4px}
+.staff-list{display:flex;flex-wrap:wrap;gap:8px}
+.staff-chip{appearance:none;display:inline-flex;align-items:center;gap:6px;border:1px solid #E4CDD4;background:#fff;color:#2E2327;border-radius:999px;padding:9px 16px;font-size:15px;font-weight:600;cursor:pointer;-webkit-user-select:none;user-select:none}
+.staff-chip:active{background:var(--accent);color:var(--accent-ink)}
+.staff-chip .x{display:none;width:18px;height:18px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:12px;line-height:18px;text-align:center}
+.staff-pop.editing .staff-chip{border-style:dashed;padding-right:10px;cursor:default}
+.staff-pop.editing .staff-chip .x{display:inline-block;cursor:pointer}
+.staff-edit{display:grid;gap:8px}
+.staff-add{display:flex;gap:8px}
+.staff-add .input{flex:1;min-width:0;min-height:42px;padding:8px 14px;font-size:15px}
+.staff-add .btn-ghost,.staff-done{color:#2E2327;white-space:nowrap}
+.staff-done{justify-self:end}
+.view-only .staff-pad{cursor:default}
+
 /* 약관 전용 보기 (?terms) */
 .terms-only #form>section:not([aria-labelledby="h-terms"]),.terms-only #form .submit-row,.terms-only .agree,.terms-only #terms-toggle,.terms-only #receipt,.terms-only .block-head .step,.terms-only .block-head .who{display:none!important}
 .terms-only .terms{max-height:none;overflow:visible;background:var(--field)}
@@ -524,9 +544,18 @@ textarea.input{border-radius:20px;padding:14px 18px}
         <div class="date-line"><span>서명일</span><b class="num" id="sign-date"></b></div>
         <div class="sigs">
           <div class="field" data-f="sigStaff">
-            <div class="sig-top"><span class="label req">담당자 확인</span><span class="sig-btns"><button type="button" class="btn-ghost" data-toggle="staff">서명하기</button><button type="button" class="btn-ghost" data-clear="staff">지우기</button></span></div>
-            <div class="pad"><div class="base"></div><div class="ph" id="ph-staff">담당자 이름 작성</div><canvas id="pad-staff" aria-label="담당자 확인란"></canvas></div>
-            <span class="emsg">담당자 이름을 작성해 주세요.</span>
+            <div class="sig-top"><span class="label req">담당자 확인</span><span class="sig-btns"><button type="button" class="btn-ghost" data-clear="staff">지우기</button></span></div>
+            <div class="pad staff-pad" id="staff-pad" role="button" tabindex="0" aria-haspopup="true" aria-label="담당자 선택"><div class="base"></div><div class="ph" id="ph-staff">터치하여 담당자 선택</div><div class="staff-picked" id="staff-picked" hidden></div><canvas id="pad-staff" aria-hidden="true"></canvas>
+              <div class="staff-pop" id="staff-pop" hidden>
+                <div class="staff-pop-head"><span>담당 선생님을 눌러 주세요</span><button type="button" class="staff-edit-btn" id="staff-edit-btn">편집</button></div>
+                <div class="staff-list" id="staff-list"></div>
+                <div class="staff-edit" id="staff-edit" hidden>
+                  <div class="staff-add"><input class="input" id="staff-new" maxlength="10" placeholder="새 선생님 이름" autocomplete="off"><button type="button" class="btn-ghost" id="staff-add">추가</button></div>
+                  <button type="button" class="btn-ghost staff-done" id="staff-done">편집 완료</button>
+                </div>
+              </div>
+            </div>
+            <span class="emsg">담당 선생님을 선택해 주세요.</span>
           </div>
           <div class="field" data-f="sigMember">
             <div class="sig-top"><span class="label req">회원 서명</span><span class="sig-btns"><button type="button" class="btn-ghost" data-toggle="member">서명하기</button><button type="button" class="btn-ghost" data-clear="member">지우기</button></span></div>
@@ -840,6 +869,70 @@ agreeItems.forEach(function(c){ c.addEventListener("change", function(){
   clearErr("agreeTerms"); clearErr("agreePrivacy");
 }); });
 
+/* ---------------- 담당자 선택 (선생님 이름 누르기) ---------------- */
+// 기본 선생님 목록. 화면의 '편집'에서 추가·삭제하면 이 기기에 저장돼요.
+var STAFF_DEFAULT = ["고세영", "박지현", "김은아", "이채윤"];
+function loadStaff(){
+  try { var v = JSON.parse(localStorage.getItem("pv.staff") || "null"); if (Array.isArray(v) && v.length) return v; } catch(e){}
+  return STAFF_DEFAULT.slice();
+}
+function saveStaff(list){ try { localStorage.setItem("pv.staff", JSON.stringify(list)); } catch(e){} }
+function StaffPicker(){
+  var pad = $("#staff-pad"), pop = $("#staff-pop"), listEl = $("#staff-list"), picked = $("#staff-picked"), ph = $("#ph-staff");
+  var list = loadStaff(), name = "", editing = false;
+  function render(){
+    listEl.innerHTML = list.map(function(n){
+      return "<button type=\"button\" class=\"staff-chip\" data-name=\"" + esc(n) + "\">" + esc(n) + "<span class=\"x\" data-del=\"" + esc(n) + "\" aria-label=\"" + esc(n) + " 삭제\">×</span></button>";
+    }).join("") || "<span style=\"font-size:13px;color:#7a6a70\">등록된 선생님이 없어요. 편집에서 추가해 주세요.</span>";
+  }
+  function show(){ picked.hidden = !name; picked.textContent = name; ph.hidden = !!name; }
+  function open(){ if (document.documentElement.classList.contains("view-only")) return; render(); pop.hidden = false; }
+  function close(){ pop.hidden = true; setEditing(false); }
+  function setEditing(on){ editing = on; pop.classList.toggle("editing", on); $("#staff-edit").hidden = !on; $("#staff-edit-btn").hidden = on; if (on) $("#staff-new").focus(); }
+  pad.addEventListener("click", function(e){ if (pop.hidden) open(); });
+  pad.addEventListener("keydown", function(e){ if ((e.key === "Enter" || e.key === " ") && pop.hidden) { e.preventDefault(); open(); } });
+  listEl.addEventListener("click", function(e){
+    e.stopPropagation();
+    var del = e.target.closest("[data-del]");
+    if (editing) {
+      if (del) { var n = del.getAttribute("data-del"); list = list.filter(function(x){ return x !== n; }); saveStaff(list); if (name === n) { name = ""; show(); } render(); }
+      return;
+    }
+    var chip = e.target.closest(".staff-chip"); if (!chip) return;
+    name = chip.getAttribute("data-name"); show(); close(); clearErr("sigStaff");
+  });
+  $("#staff-edit-btn").addEventListener("click", function(e){ e.stopPropagation(); setEditing(true); });
+  $("#staff-done").addEventListener("click", function(e){ e.stopPropagation(); setEditing(false); });
+  function add(){
+    var inp = $("#staff-new"), n = inp.value.trim(); if (!n) return;
+    if (list.indexOf(n) < 0) { list = list.concat([n]); saveStaff(list); }
+    inp.value = ""; render();
+  }
+  $("#staff-add").addEventListener("click", function(e){ e.stopPropagation(); add(); });
+  $("#staff-new").addEventListener("keydown", function(e){ if (e.key === "Enter") { e.preventDefault(); add(); } });
+  pop.addEventListener("click", function(e){ e.stopPropagation(); });
+  document.addEventListener("pointerdown", function(e){ if (!pop.hidden && !pad.contains(e.target)) close(); });
+  return {
+    pad: pad,
+    name: function(){ return name; },
+    isEmpty: function(){ return !name; },
+    clear: function(){ name = ""; show(); close(); },
+    isActive: function(){ return false; },
+    setActive: function(){},
+    resize: function(){},
+    toDataURL: function(){
+      var c = document.createElement("canvas"); c.width = 600; c.height = 200;
+      var x = c.getContext("2d");
+      x.fillStyle = "#1F1418"; x.textAlign = "center"; x.textBaseline = "middle";
+      x.font = "700 64px 'Noto Sans KR','Apple SD Gothic Neo',sans-serif";
+      x.fillText(name, 300, 92);
+      x.font = "400 22px 'Noto Sans KR','Apple SD Gothic Neo',sans-serif"; x.fillStyle = "#7a6a70";
+      x.fillText("담당 선생님 확인", 300, 160);
+      return c.toDataURL("image/png");
+    }
+  };
+}
+
 /* ---------------- 서명 패드 ---------------- */
 function SigPad(canvas, ph, onInk, onState, labels){
   labels = labels || { idle:"터치하여 서명 시작", active:"여기에 서명해 주세요" };
@@ -929,7 +1022,7 @@ function padState(key){
   };
 }
 var pads = {};
-pads.staff = SigPad($("#pad-staff"), $("#ph-staff"), function(){ clearErr("sigStaff"); }, padState("staff"), { idle:"담당자 이름 작성", active:"담당자 이름 작성" });
+pads.staff = StaffPicker();
 pads.member = SigPad($("#pad-member"), $("#ph-member"), function(){ clearErr("sigMember"); }, padState("member"));
 $$("[data-clear]").forEach(function(b){ b.addEventListener("click", function(){ pads[b.dataset.clear].clear(); }); });
 $$("[data-toggle]").forEach(function(b){ b.addEventListener("click", function(){ var p = pads[b.dataset.toggle]; p.setActive(!p.isActive()); }); });
@@ -1029,6 +1122,7 @@ form.addEventListener("submit", async function(e){
   var btn = $("#submit"); btn.disabled = true; btn.textContent = "저장 중…";
   r.phoneLast4 = digits(r.phone).slice(-4);
   r.sigStaff = pads.staff.toDataURL();
+  r.staffName = pads.staff.name();
   r.sigMember = pads.member.toDataURL();
   r.termsVersion = TERMS_VERSION;
   r.termsText = termsText();
