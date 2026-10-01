@@ -749,8 +749,12 @@ function termsText(){
 }
 
 $("#terms").innerHTML = termsHTML();
+var termsSpot = document.createComment("terms-spot");
 function setTermsFull(on){
   var w = $("#terms-wrap"), btn = $("#terms-toggle");
+  // 카드의 흐림 효과 안에서는 전체 화면이 카드 크기로 갇히므로, 확대할 때 페이지 맨 바깥으로 옮겼다가 되돌림
+  if (on && w.parentNode !== document.body) { w.parentNode.insertBefore(termsSpot, w); document.body.appendChild(w); }
+  if (!on && termsSpot.parentNode) { termsSpot.parentNode.insertBefore(w, termsSpot); termsSpot.remove(); }
   w.classList.toggle("full", on);
   document.body.classList.toggle("lock", on);
   btn.setAttribute("aria-expanded", String(on));
