@@ -871,12 +871,12 @@ agreeItems.forEach(function(c){ c.addEventListener("change", function(){
 
 /* ---------------- 담당자 선택 (선생님 이름 누르기) ---------------- */
 // 기본 선생님 목록. 화면의 '편집'에서 추가·삭제하면 이 기기에 저장돼요.
-var STAFF_DEFAULT = ["고세영", "박지현", "김은아", "이채윤"];
+var STAFF_DEFAULT = ["세영원장", "지현디자이너", "은아디자이너", "채윤디자이너"];
 function loadStaff(){
-  try { var v = JSON.parse(localStorage.getItem("pv.staff") || "null"); if (Array.isArray(v) && v.length) return v; } catch(e){}
+  try { var v = JSON.parse(localStorage.getItem("pv.staff2") || "null"); if (Array.isArray(v) && v.length) return v; } catch(e){}
   return STAFF_DEFAULT.slice();
 }
-function saveStaff(list){ try { localStorage.setItem("pv.staff", JSON.stringify(list)); } catch(e){} }
+function saveStaff(list){ try { localStorage.setItem("pv.staff2", JSON.stringify(list)); } catch(e){} }
 function StaffPicker(){
   var pad = $("#staff-pad"), pop = $("#staff-pop"), listEl = $("#staff-list"), picked = $("#staff-picked"), ph = $("#ph-staff");
   var list = loadStaff(), name = "", editing = false;
