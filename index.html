@@ -364,6 +364,13 @@ textarea.input{border-radius:20px;padding:14px 18px}
 .g-foot{margin:16px 0 0;padding:12px 16px;border-radius:14px;background:var(--field-ro);border:1px solid var(--glass-line);text-align:center;font-size:14.5px;line-height:1.6;color:var(--ink)}
 .g-foot small{font-size:12px;color:var(--muted)}
 .g-stars{color:#F5C518;letter-spacing:2px;font-size:15px}
+.g-n.pt{background:var(--accent)}
+.g-points{display:grid;gap:10px}
+.g-point{display:grid;gap:4px;padding:14px 16px;border-radius:16px;background:var(--field);border:1px solid var(--glass-line)}
+.g-point b{font-size:15.5px;letter-spacing:-.03em;color:var(--ink)}
+.g-point span{font-size:14.5px;line-height:1.65;color:var(--ink)}
+.g-point em{font-style:normal;color:#E0587A;font-weight:700}
+.g-point a{color:#2F6FD6;font-weight:600;text-decoration:none}
 .g-hr{border:0;border-top:2px dotted var(--line-strong);margin:20px 0 14px}
 
 /* 약관 전용 보기 (?terms) */
@@ -376,7 +383,8 @@ textarea.input{border-radius:20px;padding:14px 18px}
 .view-locked #form{display:none}
 .view-gate{max-width:420px;margin:18px auto 0;text-align:center}
 .view-gate h2{font-size:19px;font-weight:800;letter-spacing:-.04em;margin:0 0 6px}
-.view-gate p{margin:0 0 14px;color:var(--muted);font-size:14px}
+.view-gate p{margin:0 0 14px;color:var(--muted);font-size:14px;line-height:1.7}
+.view-gate h2{word-break:keep-all;line-height:1.4}
 .view-gate .row{display:flex;gap:8px}
 .view-gate .input{text-align:center;letter-spacing:.3em;font-size:20px}
 .view-gate .row .input{flex:1;min-width:0}
@@ -593,6 +601,13 @@ textarea.input{border-radius:20px;padding:14px 18px}
     </form>
 
     <div id="guide" class="guide" hidden>
+      <section class="block g-card" aria-labelledby="g-point">
+        <h2 id="g-point" class="g-title"><span class="g-n pt">P</span>더 많은 혜택 받아 가세요</h2>
+        <div class="g-points">
+          <div class="g-point"><b>방문할 때마다 쌓이는 포인트</b><span>매 시술 후 시술 금액에 따른 포인트 적립<br><em>5000p 이상</em> 현금처럼 사용 가능</span></div>
+          <div class="g-point"><b>추가 포인트</b><span>지인 소개 시 <em>3000p</em><br>인스타그램 태그 <em>500p</em> · <a href="https://www.instagram.com/premiel_nail/" target="_blank" rel="noopener">@premiel_nail</a></span></div>
+        </div>
+      </section>
       <section class="block g-card" aria-labelledby="g-book">
         <h2 id="g-book" class="g-title"><span class="g-n">N</span>회원권 네이버 예약방법</h2>
         <p class="g-notice">매장 연락 후 조율된 시간으로 네이버 예약을 진행해 주세요!</p>
@@ -630,8 +645,8 @@ textarea.input{border-radius:20px;padding:14px 18px}
         <div id="save-state"></div>
         <div class="view-link" id="view-link-box" hidden>
           <span class="label">내 계약서 보기 링크</span>
-          <div class="view-link-row"><a id="view-link" href="#" target="_blank" rel="noopener"></a><button type="button" class="btn" id="copy-link">링크 복사</button></div>
-          <p class="hint" style="margin:0">이 링크를 고객에게 네이버 톡톡으로 보내 주세요. 고객은 연락처 뒷 4자리를 입력하면 작성한 계약서를 볼 수 있어요.</p>
+          <div class="view-link-row"><a id="view-link" href="#" target="_blank" rel="noopener"></a><button type="button" class="btn" id="copy-link">안내문·링크 복사</button></div>
+          <p class="hint" style="margin:0">감사 인사·포인트 안내와 링크가 함께 복사돼요. 네이버 톡톡에 붙여넣어 보내 주세요.</p>
         </div>
         <div class="copy-host"></div>
       </div>
@@ -1315,13 +1330,27 @@ function showReceipt(r, res){
   $("#receipt-sheet").innerHTML = sheetHTML(r);
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
+function welcomeText(url){
+  return [
+    "프리미엘네일 혜택권을 구매해 주셔서 감사합니다😊",
+    "핸드폰번호 뒷 4자리 입력해주시면 확인 가능합니다. 읽어보시고 더 많은 혜택 받아 가세요❣️",
+    "",
+    url,
+    "",
+    "*방문할 때마다 쌓이는 포인트",
+    "(매 시술 후 시술 금액에 따른 포인트 적립/5000p 이상 현금처럼 사용 가능)",
+    "*추가 포인트",
+    "지인 소개 시(3000p)",
+    "인스타그램 태그(500p)@premiel_nail"
+  ].join("\n");
+}
 $("#copy-link").addEventListener("click", async function(){
   var r = lastRecord; if (!r || !r.viewUrl) return;
-  try { await navigator.clipboard.writeText(r.viewUrl); toast("링크를 복사했어요. 네이버 톡톡에 붙여넣어 주세요."); }
+  try { await navigator.clipboard.writeText(welcomeText(r.viewUrl)); toast("안내문과 링크를 복사했어요. 네이버 톡톡에 붙여넣어 주세요."); }
   catch (e) {
     var host = $(".copy-host", $("#receipt"));
-    host.innerHTML = "<p class=\"hint\" style=\"margin:10px 0 0\">자동 복사가 막혀 있어요. 아래 링크를 길게 눌러 복사해 주세요.</p><textarea class=\"input copy-fallback\" style=\"min-height:70px\" readonly></textarea>";
-    var ta = $("textarea", host); ta.value = r.viewUrl; ta.focus(); ta.select();
+    host.innerHTML = "<p class=\"hint\" style=\"margin:10px 0 0\">자동 복사가 막혀 있어요. 아래 글을 길게 눌러 전체 선택 후 복사해 주세요.</p><textarea class=\"input copy-fallback\" style=\"min-height:70px\" readonly></textarea>";
+    var ta = $("textarea", host); ta.style.minHeight = "220px"; ta.value = welcomeText(r.viewUrl); ta.focus(); ta.select();
   }
 });
 
@@ -1377,7 +1406,7 @@ if (document.documentElement.classList.contains("view-only")) {
   var id = viewId();
   var gate = document.createElement("section");
   gate.className = "block view-gate";
-  gate.innerHTML = "<h2>내 계약서 보기</h2><p>본인 확인을 위해 계약 시 입력한 연락처 뒷 4자리를 입력해 주세요.</p>" +
+  gate.innerHTML = "<h2>프리미엘네일 혜택권을 구매해 주셔서 감사합니다😊</h2><p>핸드폰번호 뒷 4자리 입력해주시면 확인 가능합니다.<br>읽어보시고 더 많은 혜택 받아 가세요❣️</p>" +
     "<div class=\"row\"><input class=\"input num\" id=\"gate-p4\" inputmode=\"numeric\" maxlength=\"4\" placeholder=\"0000\" aria-label=\"연락처 뒷 4자리\"><button type=\"button\" class=\"btn\" id=\"gate-go\">확인</button></div>" +
     "<div class=\"msg\" id=\"gate-msg\" role=\"status\"></div>";
   form.parentNode.insertBefore(gate, form);
