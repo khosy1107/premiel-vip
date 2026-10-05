@@ -371,6 +371,10 @@ textarea.input{border-radius:20px;padding:14px 18px}
 .g-point span{font-size:14.5px;line-height:1.65;color:var(--ink)}
 .g-point em{font-style:normal;color:#E0587A;font-weight:700}
 .g-point a{color:#2F6FD6;font-weight:600;text-decoration:none}
+.g-hours span{font-size:14px;color:var(--ink)}
+.g-hours b{color:var(--ink);font-size:14px}
+.g-hours a{color:#2F6FD6;font-weight:700;text-decoration:none;white-space:nowrap}
+.g-tag{font-size:13px;font-weight:700;color:#E0587A;background:#FDE8EE;border-radius:999px;padding:3px 10px;letter-spacing:0}
 .g-hr{border:0;border-top:2px dotted var(--line-strong);margin:20px 0 14px}
 
 /* 약관 전용 보기 (?terms) */
@@ -609,20 +613,18 @@ textarea.input{border-radius:20px;padding:14px 18px}
         </div>
       </section>
       <section class="block g-card" aria-labelledby="g-book">
-        <h2 id="g-book" class="g-title"><span class="g-n">N</span>회원권 네이버 예약방법</h2>
-        <p class="g-notice">매장 연락 후 조율된 시간으로 네이버 예약을 진행해 주세요!</p>
+        <h2 id="g-book" class="g-title"><span class="g-n">N</span>회원권 예약방법</h2>
+        <p class="g-notice">매장과 시간, 날짜 협의 후 보내드리는 링크로 네이버 예약을 진행해주세요</p>
         <ol class="g-steps">
-          <li>네이버에서 <b>[프리미엘네일]</b> 검색</li>
-          <li><span class="g-chip"><span class="g-n sm">N</span>예약</span> 예약창 <em>클릭</em></li>
-          <li>하단 <b>[회원권 전용]</b>에서 원하는 시술자 <em>선택</em>
-            <div class="g-sample"><b>회원권전용 세영원장</b><span>*취소 및 변경 시 회원권에서 예약금(3만원)이 차감됩니다. 신중한 예약 부탁드려요.</span></div>
+          <li><b>예약 일자, 시간 문의</b>
+            <div class="g-sample g-hours"><span><b>영업시간 내</b> (10:00-21:00) 전화문의 <a href="tel:01023446250">010-2344-6250</a></span><span><b>영업시간 외</b> (21:00-10:00) 네이버 톡톡 문의</span></div>
           </li>
-          <li><b>협의된 날짜, 시간</b>으로 예약 진행</li>
+          <li>보내드리는 링크 <b>[회원권 전용]</b>에서 시술내역 <em>선택</em> 후 예약</li>
         </ol>
-        <p class="g-foot">[회원권 전용]창은 <em>예약금 결제</em>가 진행되지 않습니다.<br>취소 및 변경 시 규정에 따라 예약금이 <em>회원권 적립금에서 차감</em>됩니다.</p>
+        <p class="g-foot"><em>임의로 예약</em>, 취소 및 변경 시 규정에 따라 <em>회원권에서 예약금이 차감</em>됩니다.</p>
       </section>
       <section class="block g-card" aria-labelledby="g-review">
-        <h2 id="g-review" class="g-title"><span class="g-n">N</span>네이버 리뷰 이벤트</h2>
+        <h2 id="g-review" class="g-title"><span class="g-n">N</span>네이버 리뷰 이벤트 <small class="g-tag">5천원 할인</small></h2>
         <h3 class="g-sub">리뷰 작성방법</h3>
         <ol class="g-steps">
           <li>네이버 메인 오른쪽 상단 또는 하단 <b>[마이]</b> <em>클릭</em></li>
