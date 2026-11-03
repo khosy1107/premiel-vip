@@ -16,6 +16,7 @@ const TOKEN = 'premiel-vip-2026';   // index.html 의 API.token 과 같아야 �
 const ID_COL = 18;                  // R열: 계약ID
 const PDF_COL = 19;                 // S열: 계약서 PDF
 const VIEW_BASE = 'https://khosy1107.github.io/premiel-vip/?c=';
+const STAFF_SHEET = '선생님목록';   // A2부터 선생님 이름
 
 function doPost(e) {
   try {
@@ -77,6 +78,7 @@ function doPost(e) {
 }
 
 function doGet(e) {
+  if (e && e.parameter && e.parameter.staff) return json_({ ok: true, staff: staff_() });
   const id = e && e.parameter && e.parameter.id;
   if (!id) return ContentService.createTextOutput('프리미엘네일 계약서 저장 서버가 동작 중입니다.');
   const p4 = String(e.parameter.p4 || '');
@@ -103,6 +105,15 @@ function imageData_(url) {
   } catch (err) {
     return '';
   }
+}
+
+// '선생님목록' 탭 A열(A2부터)의 이름. 빈칸은 건너뜀
+function staff_() {
+  const sh = SpreadsheetApp.openById(SHEET_ID).getSheetByName(STAFF_SHEET);
+  if (!sh || sh.getLastRow() < 2) return [];
+  return sh.getRange(2, 1, sh.getLastRow() - 1, 1).getDisplayValues()
+    .map(function (v) { return String(v[0]).trim(); })
+    .filter(function (v) { return v; });
 }
 
 function folder_() {
