@@ -144,6 +144,17 @@ details.ref summary{cursor:pointer;font-size:13.5px;color:var(--accent);font-wei
 .terms-wrap.full .terms ol,.terms-wrap.full .terms ul{font-size:15.5px;line-height:1.8}
 .terms-wrap.full .terms section{margin-bottom:22px}
 body.lock{overflow:hidden}
+/* 약관 확대 화면 형광펜 */
+.terms{position:relative}
+.ink{position:absolute;left:0;top:0;display:none;pointer-events:none;touch-action:none;z-index:2}
+.terms-wrap.full .ink{display:block}
+.terms-wrap.full.drawing .ink{pointer-events:auto}
+.ink-bar{display:none}
+.terms-wrap.full .ink-bar{display:flex;position:sticky;bottom:0;z-index:3;max-width:760px;margin:12px auto 0;gap:6px;flex-wrap:wrap;justify-content:center;padding:8px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:0 -6px 18px -10px rgba(0,0,0,.25)}
+.ink-bar button{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 12px;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface-2);color:var(--ink,inherit);font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+.ink-bar button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.ink-bar .dot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.15)}
+.ink-hint{width:100%;text-align:center;font-size:12px;color:var(--muted);margin:0}
 .agree{display:grid;gap:10px;margin-top:14px}
 table.rate.vip{min-width:420px}
 .rate.vip td:first-child{white-space:nowrap}
@@ -553,6 +564,15 @@ textarea.input{border-radius:20px;padding:14px 18px}
         <div class="terms-wrap" id="terms-wrap">
           <button type="button" class="terms-banner" id="terms-toggle" aria-expanded="false" aria-controls="terms"><span id="terms-toggle-label">약관 확대해서 보기</span><span id="terms-toggle-ic"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M9.5 2.5h4v4M6.5 13.5h-4v-4M13.5 2.5 9 7M2.5 13.5 7 9"/></svg></span></button>
           <div class="terms" id="terms" tabindex="0" aria-label="약관 전문"></div>
+          <div class="ink-bar" id="ink-bar" role="toolbar" aria-label="설명용 펜">
+            <button type="button" data-tool="hl-y" aria-pressed="false"><span class="dot" style="background:#FFE14D"></span>노랑 형광펜</button>
+            <button type="button" data-tool="hl-p" aria-pressed="false"><span class="dot" style="background:#FF8FB8"></span>핑크 형광펜</button>
+            <button type="button" data-tool="pen" aria-pressed="false"><span class="dot" style="background:#E5484D"></span>빨간 펜</button>
+            <button type="button" data-tool="erase" aria-pressed="false">지우개</button>
+            <button type="button" data-tool="off" aria-pressed="true">펜 끄기</button>
+            <button type="button" id="ink-clear">모두 지우기</button>
+            <p class="ink-hint">펜을 고르면 애플펜슬로 표시하고, 손가락으로는 화면을 넘길 수 있어요. 표시는 설명용이라 계약서에 저장되지 않아요.</p>
+          </div>
         </div>
         <p class="terms-foot" id="terms-foot" hidden></p>
         <div class="agree">
@@ -634,7 +654,7 @@ textarea.input{border-radius:20px;padding:14px 18px}
           <li>네이버에서 <b>[MY플레이스]</b> 검색</li>
           <li><b>[내 리뷰]</b>에서 작성된 리뷰 확인</li>
         </ol>
-        <p class="g-foot">리뷰가 확인되면 다음 시술 시 <em>5천원</em> 할인해 드립니다.<br><small>할인 혜택을 받았다는 내용을 리뷰에 함께 적어 주세요.</small></p>
+        <p class="g-foot">다음 젤 시술 시 작성하신 리뷰 내역을 보여주시면 <em>5천원</em> 할인해 드립니다.<br><small>할인 혜택을 받았다는 내용을 리뷰에 함께 적어 주세요.</small></p>
       </section>
     </div>
 
@@ -662,7 +682,7 @@ textarea.input{border-radius:20px;padding:14px 18px}
 
 /* ---------------- 기준 정보 ---------------- */
 var SHOP = { name: "프리미엘네일", tel: "010-2344-6250" };
-var TERMS_VERSION = "2026.09 v4";
+var TERMS_VERSION = "2026.11 v5";
 var TERMS_URL = "https://khosy1107.github.io/premiel-vip/terms/";
 var PLANS = [
   { id:"100", label:"100만원권", price:1000000, creditCash:1100000, creditCard:1000000, months:18 },
@@ -689,14 +709,15 @@ var TERMS = [
     "예약 전에 매장과 시술 일정·시간을 먼저 상담해 주세요.",
     ["영업시간 내(10:00~21:00): 전화 또는 네이버 톡톡",
      "영업시간 외(21:00~다음 날 10:00): 네이버 톡톡"],
-    "상담 후 보내드리는 네이버 예약 링크로, 협의된 날짜·시간에 예약해 주세요. 수기 예약에서 생기는 오류를 막기 위한 방식이니 양해 부탁드립니다.",
+    "상담 후 보내드리는 네이버 예약 링크로, 협의된 날짜·시간에 예약해 주세요. 네이버 리뷰 이벤트 참여가 가능하며, 수기 예약에서 생기는 오류를 막기 위한 방식이니 양해 부탁드립니다.",
     "회원권으로 예약하실 때 실제로 결제되는 예약금은 없습니다. 다만 회원권 잔액이 예약금 이상 남아 있어야 예약할 수 있으며, 취소·변경 시에는 제3조에 따라 잔액에서 차감됩니다.",
     "예약 시간보다 10분 이상 늦으시면 다음 예약을 위해 시술이 어렵습니다. 지연으로 인해 시술이 불가한 경우 당일 취소로 봅니다."
   ]},
   { t:"제3조 예약 취소 및 변경", items:[
+    "예약금이란 고객님 한 분만을 위해 담당 디자이너의 시간을 사전에 확보해 두는 비용입니다. 예약 취소뿐 아니라 일정 변경 시에도 발생하는 시간적·영업적 손실을 보전하기 위해 받는 금액으로, 고객님의 개인적인 사정으로 인한 취소나 변경 또한 환불 사유에 해당하지 않습니다.",
     "예약금 기준",
     ["시술 1건당 3만원\n(예: 손젤·발젤·각질제거를 함께 예약하시면 9만원)",
-     "제거·케어 예약: 시술 금액 전액\n(제거는 회원 무료 시술이므로, 취소·변경 시 비회원가 자샵 제거 비용이 차감됩니다.)"],
+     "제거·케어 예약: 시술 금액 전액\n(자샵 제거는 회원권 보유 시 무료 시술이나, 취소 및 변경 시 비회원가 자샵 제거 비용이 차감됩니다.)"],
     "취소·변경 시 회원권 잔액에서 차감되는 금액",
     ["예약 3일 전까지: 차감 없음",
      "예약 2일 전: 예약금의 50%",
@@ -704,22 +725,18 @@ var TERMS = [
     "매장과 협의되지 않은 시간으로 임의로 예약·변경·취소하시는 경우에도 처음 예약하신 날짜를 기준으로 차감됩니다.",
     "개인 사정으로 예약보다 짧은 시술로 변경하시는 경우에도 이미 배정된 시간과 준비 과정으로 인해 해당 시술 예약금이 차감됩니다."
   ]},
-  { t:"제4조 해지 및 환불", src:"공정거래위원회 소비자분쟁해결기준(2018. 2. 28. 시행)에 따릅니다.", items:[
+  { t:"제4조 해지 및 환불", items:[
     "회원은 「방문판매 등에 관한 법률」 제31조에 따라 계약기간 중 언제든지 계약을 해지하고 환불을 요청할 수 있습니다.",
-    "매장(사업자)의 귀책사유로 해지하는 경우",
-    ["이용 개시 전: 결제 금액 전액 환급 및 결제 금액의 10% 배상",
-     "이용 개시 후: 결제 금액에서 이용 금액을 공제한 잔액 환급 및 결제 금액의 10% 배상"],
-    "회원의 사정으로 해지하는 경우",
-    ["이용 개시 전: 결제 금액의 10%를 위약금으로 공제 후 환급",
-     "이용 개시 후: 결제 금액에서 이용 금액과 결제 금액의 10%(위약금)를 공제 후 환급"],
-    "회원권은 매장 내 모든 디자이너가 시술하므로, 담당 디자이너의 퇴사 등 인력 변동은 매장 귀책 해지 사유가 아니며 회원 사정에 의한 해지와 같은 기준으로 환불합니다.",
-    "'이용 금액'은 다음을 합한 금액입니다. 다만 공제하는 총액은 결제 금액을 넘지 않습니다.",
-    ["사용한 적립금 × (실제 결제 금액 ÷ 총 적립 금액). 따라서 현금·이체, 방문·연장, 프로모션 등으로 무상 지급된 추가 적립금은 환불 대상이 아닙니다.",
-     "회원 혜택으로 무료 제공받은 서비스(기분오일테라피, 젤 제거 등)의 매장 게시 정상가"],
+    "환불 금액은 남은 적립금에서 아래 금액을 차감한 금액입니다. 별도의 위약금은 없습니다.",
+    ["추가로 적립받은 금액 전부 (현금·이체 추가 적립, 방문·연장 추가 적립, 프로모션 적립 등)",
+     "회원 혜택으로 무료 제공받은 서비스(자샵 제거, 기분오일테라피 등)의 매장 게시 정상가"],
+    "환불 금액은 실제 결제 금액을 넘지 않으며, 차감 후 남는 금액이 없으면 환불 금액은 없습니다.",
+    "회원권은 특정 디자이너 개인의 회원권이 아닌 매장 회원권이므로, 담당 디자이너의 퇴사 등 인력 변동은 매장의 귀책사유가 되지 않습니다.",
+    "매장의 귀책사유(폐업 등)로 해지하는 경우에는 공정거래위원회 소비자분쟁해결기준에 따라 환급·배상합니다.",
     "환불은 요청일로부터 3영업일 이내에 결제 수단에 따라 카드 결제 취소 또는 계좌 이체로 처리합니다."
   ]},
   { t:"제5조 추가 혜택", items:[
-    "네이버 포토리뷰를 작성해 주시면 다음 시술 시 5,000원을 추가 할인해 드립니다. 별점과 관계없이 드리는 혜택입니다.",
+    "네이버 포토리뷰를 작성해 주시면 다음 젤 시술 시 5,000원을 추가 할인해 드립니다. 시술 시 작성하신 리뷰 내역을 보여주시면 적용해 드립니다.",
     ["적용 시술: 젤 시술, 패디플래닝, 교정, 키즈젤 (제거·케어 제외)"],
     "인스타그램에 매장을 태그해 업로드하시면(스토리·게시글·릴스) 500P를 추가 적립해 드립니다.",
     "혜택을 받고 작성하신 리뷰·게시물에는 '할인(적립) 혜택을 받았다'는 사실을 함께 적어 주세요. (표시·광고법상 경제적 이해관계 표시)"
@@ -845,6 +862,74 @@ function termsText(){
 }
 
 $("#terms").innerHTML = termsHTML();
+// 약관 확대 화면에서 애플펜슬로 형광펜·펜 표시 (설명용, 저장 안 함)
+var Ink = (function(){
+  var terms = $("#terms"), wrap = $("#terms-wrap"), cv = document.createElement("canvas"), ctx = cv.getContext("2d");
+  cv.className = "ink"; cv.setAttribute("aria-hidden", "true"); terms.appendChild(cv);
+  var TOOLS = { "hl-y":{c:"rgba(255,225,77,.45)",w:20}, "hl-p":{c:"rgba(255,120,170,.35)",w:20}, "pen":{c:"#E5484D",w:2.6} };
+  var strokes = [], cur = null, tool = "off", dpr = 1, fp = null, vy = 0, raf = 0;
+  function size(){
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var w = terms.clientWidth, h = terms.scrollHeight;
+    cv.style.width = w + "px"; cv.style.height = h + "px";
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    draw();
+  }
+  function draw(){
+    ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cv.width,cv.height); ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    strokes.concat(cur ? [cur] : []).forEach(function(s){
+      var t = TOOLS[s.tool]; if (!s.pts.length) return;
+      ctx.strokeStyle = t.c; ctx.lineWidth = t.w; ctx.beginPath(); ctx.moveTo(s.pts[0][0], s.pts[0][1]);
+      if (s.pts.length === 1) ctx.lineTo(s.pts[0][0] + .1, s.pts[0][1]);
+      for (var i = 1; i < s.pts.length; i++) ctx.lineTo(s.pts[i][0], s.pts[i][1]);
+      ctx.stroke();
+    });
+  }
+  function pt(e){ var r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+  function erase(p){
+    strokes = strokes.filter(function(s){
+      var r = TOOLS[s.tool].w / 2 + 12;
+      return !s.pts.some(function(q){ return Math.abs(q[0]-p[0]) < r && Math.abs(q[1]-p[1]) < r; });
+    });
+    draw();
+  }
+  function glide(){ // 손가락으로 넘긴 뒤 살짝 미끄러지듯 이어서 스크롤
+    vy *= .94; if (Math.abs(vy) < .3) return; wrap.scrollTop -= vy; raf = requestAnimationFrame(glide);
+  }
+  cv.addEventListener("pointerdown", function(e){
+    e.preventDefault(); cancelAnimationFrame(raf);
+    if (e.pointerType === "touch") { fp = { id:e.pointerId, y:e.clientY, t:e.timeStamp }; vy = 0; return; }
+    cv.setPointerCapture(e.pointerId);
+    if (tool === "erase") { cur = { erase:true }; erase(pt(e)); return; }
+    cur = { tool:tool, pts:[pt(e)] }; draw();
+  });
+  cv.addEventListener("pointermove", function(e){
+    if (fp && e.pointerId === fp.id) {
+      var dy = e.clientY - fp.y, dt = Math.max(e.timeStamp - fp.t, 1);
+      wrap.scrollTop -= dy; vy = dy / dt * 16; fp.y = e.clientY; fp.t = e.timeStamp; return;
+    }
+    if (!cur) return;
+    (e.getCoalescedEvents ? e.getCoalescedEvents() : [e]).forEach(function(ev){
+      if (cur.erase) erase(pt(ev)); else cur.pts.push(pt(ev));
+    });
+    if (!cur.erase) draw();
+  });
+  function up(e){
+    if (fp && e.pointerId === fp.id) { fp = null; raf = requestAnimationFrame(glide); return; }
+    if (cur && !cur.erase) strokes.push(cur);
+    cur = null; draw();
+  }
+  cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
+  function setTool(t){
+    tool = t; wrap.classList.toggle("drawing", t !== "off");
+    $$("#ink-bar [data-tool]").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.tool === t)); });
+  }
+  $$("#ink-bar [data-tool]").forEach(function(b){ b.addEventListener("click", function(){ setTool(b.dataset.tool); }); });
+  $("#ink-clear").addEventListener("click", function(){ strokes = []; draw(); });
+  window.addEventListener("resize", function(){ if (wrap.classList.contains("full")) { strokes = []; size(); } });
+  return { reset:function(on){ strokes = []; cur = null; setTool("off"); if (on) requestAnimationFrame(size); } };
+})();
 var termsSpot = document.createComment("terms-spot");
 function setTermsFull(on){
   var w = $("#terms-wrap"), btn = $("#terms-toggle");
@@ -858,6 +943,7 @@ function setTermsFull(on){
   $("#terms-toggle-ic").innerHTML = on
     ? '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg>'
     : '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M9.5 2.5h4v4M6.5 13.5h-4v-4M13.5 2.5 9 7M2.5 13.5 7 9"/></svg>';
+  Ink.reset(on);
   if (on) { w.scrollTop = 0; btn.focus(); }
   else { w.scrollIntoView({ block:"start" }); window.scrollBy(0, -60); }
 }
